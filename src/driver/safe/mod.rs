@@ -6,6 +6,7 @@ pub(crate) mod device_ptr;
 pub(crate) mod external_memory;
 pub(crate) mod launch;
 pub(crate) mod profile;
+#[cfg(feature = "nvrtc")]
 pub(crate) mod ptx;
 pub(crate) mod threading;
 
