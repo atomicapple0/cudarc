@@ -6,7 +6,7 @@ pub mod sys;
 mod tests {
     use crate::{
         driver::sys::CUresult,
-        runtime::sys::{cudaDriverGetVersion, cudaError},
+        runtime::sys::{cudaDriverGetVersion, cudaError, cudaGetErrorString},
     };
 
     // This should work without GPU
@@ -21,12 +21,21 @@ mod tests {
     }
 
     #[test]
+    fn get_err_string() {
+        let err_str = unsafe { cudaGetErrorString(cudaError::cudaErrorInvalidValue) };
+        let err_str = unsafe { std::ffi::CStr::from_ptr(err_str) };
+        println!("Error String = {:?}", err_str);
+    }
+
+    #[test]
     fn into_result() {
         let result = unsafe {
             let mut version = 0;
             cudaDriverGetVersion(&mut version as _)
         };
+        println!("cudaError = {:?}", result);
         let result: CUresult = result.into();
+        println!("CUresult = {:?}", result);
         assert!(result.result().is_ok());
     }
 }
