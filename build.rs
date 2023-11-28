@@ -30,6 +30,8 @@ fn link_cuda() {
 
     #[cfg(feature = "driver")]
     println!("cargo:rustc-link-lib=dylib=cuda");
+    #[cfg(feature = "runtime")]
+    println!("cargo:rustc-link-lib=dylib=cudart");
     #[cfg(feature = "nccl")]
     println!("cargo:rustc-link-lib=dylib=nccl");
 
