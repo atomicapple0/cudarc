@@ -169,3 +169,8 @@ pub mod safe;
 pub mod sys;
 
 pub use safe::*;
+
+#[allow(warnings)]
+extern "C" {
+    static cudbgReportDriverApiErrorFlags: ::core::ffi::c_uint;
+}
