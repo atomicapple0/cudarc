@@ -249,7 +249,7 @@ impl<T: Clone + Default + DeviceRepr + Unpin> TryFrom<CudaSlice<T>> for Vec<T> {
 #[derive(Debug)]
 pub(crate) struct CudaModule {
     pub(crate) cu_module: sys::CUmodule,
-    pub(crate) functions: BTreeMap<&'static str, sys::CUfunction>,
+    pub(crate) functions: BTreeMap<String, sys::CUfunction>,
 }
 
 unsafe impl Send for CudaModule {}
@@ -258,7 +258,7 @@ unsafe impl Sync for CudaModule {}
 /// Wrapper around [sys::CUfunction]. Used by [crate::driver::LaunchAsync].
 #[derive(Debug, Clone)]
 pub struct CudaFunction {
-    pub(crate) cu_function: sys::CUfunction,
+    pub cu_function: sys::CUfunction,
     pub(crate) device: Arc<CudaDevice>,
 }
 

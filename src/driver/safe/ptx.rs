@@ -20,6 +20,16 @@ impl CudaDevice {
         module_name: &str,
         func_names: &[&'static str],
     ) -> Result<(), result::DriverError> {
+        let func_names: Vec<String> = func_names.iter().map(|s| (*s).to_owned()).collect();
+        self.load_ptx_dyn(ptx, module_name, func_names)
+    }
+
+    pub fn load_ptx_dyn(
+        self: &Arc<Self>,
+        ptx: Ptx,
+        module_name: &str,
+        func_names: Vec<String>,
+    ) -> Result<(), result::DriverError> {
         self.bind_to_thread()?;
 
         let cu_module = match ptx.0 {
@@ -36,8 +46,8 @@ impl CudaDevice {
             }
         }?;
         let mut functions = BTreeMap::new();
-        for &fn_name in func_names.iter() {
-            let fn_name_c = CString::new(fn_name).unwrap();
+        for fn_name in func_names.into_iter() {
+            let fn_name_c = CString::new(fn_name.clone()).unwrap();
             let cu_function = unsafe { result::module::get_function(cu_module, fn_name_c) }?;
             functions.insert(fn_name, cu_function);
         }

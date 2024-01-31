@@ -48,7 +48,7 @@ impl CudaModule {
 
 impl CudaFunction {
     #[inline(always)]
-    unsafe fn launch_async_impl(
+    pub unsafe fn launch_async_impl(
         self,
         cfg: LaunchConfig,
         params: &mut [*mut std::ffi::c_void],
@@ -65,7 +65,7 @@ impl CudaFunction {
     }
 
     #[inline(always)]
-    unsafe fn par_launch_async_impl(
+    pub unsafe fn par_launch_async_impl(
         self,
         stream: &CudaStream,
         cfg: LaunchConfig,
@@ -214,9 +214,9 @@ unsafe impl<$($Vars: DeviceRepr),*> LaunchAsync<($($Vars, )*)> for CudaFunction 
     unsafe fn launch(
         self,
         cfg: LaunchConfig,
-        args: ($($Vars, )*)
+        _args: ($($Vars, )*)
     ) -> Result<(), result::DriverError> {
-        let params = &mut [$(args.$Idx.as_kernel_param(), )*];
+        let params = &mut [$(_args.$Idx.as_kernel_param(), )*];
         self.launch_async_impl(cfg, params)
     }
 
@@ -225,15 +225,16 @@ unsafe impl<$($Vars: DeviceRepr),*> LaunchAsync<($($Vars, )*)> for CudaFunction 
         self,
         stream: &CudaStream,
         cfg: LaunchConfig,
-        args: ($($Vars, )*)
+        _args: ($($Vars, )*)
     ) -> Result<(), result::DriverError> {
-        let params = &mut [$(args.$Idx.as_kernel_param(), )*];
+        let params = &mut [$(_args.$Idx.as_kernel_param(), )*];
         self.par_launch_async_impl(stream, cfg, params)
     }
 }
     };
 }
 
+impl_launch!([], []);
 impl_launch!([A], [0]);
 impl_launch!([A, B], [0, 1]);
 impl_launch!([A, B, C], [0, 1, 2]);
