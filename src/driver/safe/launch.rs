@@ -81,6 +81,26 @@ impl CudaFunction {
             params,
         )
     }
+
+    #[inline(always)]
+    pub unsafe fn par_launch_async_impl_ex(
+        self,
+        stream: &CudaStream,
+        cfg: LaunchConfig,
+        params: &mut [*mut std::ffi::c_void],
+        programmatic_stream_serialization_allowed: bool,
+    ) -> Result<(), result::DriverError> {
+        self.device.bind_to_thread()?;
+        result::launch_kernel_ex(
+            self.cu_function,
+            cfg.grid_dim,
+            cfg.block_dim,
+            cfg.shared_mem_bytes,
+            stream.stream,
+            params,
+            programmatic_stream_serialization_allowed,
+        )
+    }
 }
 
 /// Configuration for [result::launch_kernel]

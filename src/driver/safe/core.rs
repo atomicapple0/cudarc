@@ -1,4 +1,7 @@
-use crate::driver::{result, sys};
+use crate::driver::{
+    result,
+    sys::{self, CUevent},
+};
 
 use super::{alloc::DeviceRepr, device_ptr::DeviceSlice};
 
@@ -419,6 +422,9 @@ pub struct CudaStream {
     device: Arc<CudaDevice>,
 }
 
+unsafe impl Send for CudaStream {}
+unsafe impl Sync for CudaStream {}
+
 impl CudaDevice {
     /// Allocates a new stream that can execute kernels concurrently to the default stream.
     ///
@@ -463,6 +469,17 @@ impl CudaStream {
             result::stream::wait_event(
                 self.stream,
                 self.device.event,
+                sys::CUevent_wait_flags::CU_EVENT_WAIT_DEFAULT,
+            )
+        }
+    }
+
+    pub fn wait_for(&self, event: CUevent) -> Result<(), result::DriverError> {
+        unsafe {
+            // result::event::record(event, self.stream)?;
+            result::stream::wait_event(
+                self.stream,
+                event,
                 sys::CUevent_wait_flags::CU_EVENT_WAIT_DEFAULT,
             )
         }

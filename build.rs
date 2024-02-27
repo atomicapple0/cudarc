@@ -105,6 +105,7 @@ fn root_candidates() -> impl Iterator<Item = PathBuf> {
         "/usr/local/cuda",
         "/opt/cuda",
         "/usr/lib/cuda",
+        "/usr/local/cuda-12.2/",
         "C:/Program Files/NVIDIA GPU Computing Toolkit",
         "C:/CUDA",
     ];

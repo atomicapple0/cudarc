@@ -11,7 +11,9 @@
 //! to make naming easier. For example [sys::cuStreamCreate()]
 //! turns into [stream::create()], where [stream] is a module.
 
-use super::sys;
+use crate::driver::sys::{CUlaunchAttribute, CUlaunchAttributeValue};
+
+use super::sys::{self, CUlaunchConfig};
 use core::ffi::{c_uchar, c_uint, c_void, CStr};
 use std::mem::MaybeUninit;
 
@@ -813,6 +815,46 @@ pub unsafe fn launch_kernel(
         block_dim.2,
         shared_mem_bytes,
         stream,
+        kernel_params.as_mut_ptr(),
+        std::ptr::null_mut(),
+    )
+    .result()
+}
+
+#[inline]
+pub unsafe fn launch_kernel_ex(
+    f: sys::CUfunction,
+    grid_dim: (c_uint, c_uint, c_uint),
+    block_dim: (c_uint, c_uint, c_uint),
+    shared_mem_bytes: c_uint,
+    stream: sys::CUstream,
+    kernel_params: &mut [*mut c_void],
+    programmatic_stream_serialization_allowed: bool,
+) -> Result<(), DriverError> {
+    let attrs: &mut [CUlaunchAttribute] = &mut [CUlaunchAttribute {
+        id: sys::CUlaunchAttributeID::CU_LAUNCH_ATTRIBUTE_PROGRAMMATIC_STREAM_SERIALIZATION,
+        pad: [0; 4],
+        value: CUlaunchAttributeValue {
+            programmaticStreamSerializationAllowed: programmatic_stream_serialization_allowed as _,
+        },
+    }];
+
+    let config = CUlaunchConfig {
+        gridDimX: grid_dim.0,
+        gridDimY: grid_dim.1,
+        gridDimZ: grid_dim.2,
+        blockDimX: block_dim.0,
+        blockDimY: block_dim.1,
+        blockDimZ: block_dim.2,
+        sharedMemBytes: shared_mem_bytes,
+        hStream: stream,
+        attrs: attrs.as_mut_ptr(),
+        numAttrs: attrs.len() as u32,
+    };
+
+    sys::cuLaunchKernelEx(
+        &config as _,
+        f,
         kernel_params.as_mut_ptr(),
         std::ptr::null_mut(),
     )
