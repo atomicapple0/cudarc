@@ -93,5 +93,7 @@ pub mod runtime;
 pub mod nccl;
 #[cfg(feature = "nvrtc")]
 pub mod nvrtc;
+#[cfg(feature = "cupti")]
+pub mod cupti;
 
 pub mod types;
